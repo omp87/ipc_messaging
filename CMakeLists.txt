@@ -8,7 +8,3 @@ target_link_libraries(host_process ${OpenCV_LIBS})
 
 add_executable(remote_process remote_process.cpp)
 target_link_libraries(remote_process ${OpenCV_LIBS})
-
-add_executable(basic_host basic_host.cpp)
-
-add_executable(basic_remote basic_remote.cpp)

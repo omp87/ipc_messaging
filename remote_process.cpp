@@ -10,7 +10,8 @@ int main()
 
     key_t key_data_host_remote;
     key_data_host_remote = ftok(".", 61);
-    int msgid_data_host_remote;
+    int shmid_data_host_remote = shmget(key_data_host_remote,SHARED_IMAGE_BUFFER_SIZE,0666|IPC_CREAT);
+    uint8_t *image_buffer = (uint8_t*) shmat(shmid_data_host_remote,(void*)0,0);
 
     key_t key_ctl_remote_host;
     key_ctl_remote_host = ftok(".", 62);
@@ -26,16 +27,14 @@ int main()
     msgrcv(msgid_ctl_host_remote, &message_ctl_host_remote, sizeof(message), 1, 0);
     printf("Data Received is : %d \n", message_ctl_host_remote.data_message_size);
 
-    msgid_data_host_remote = msgget(key_data_host_remote, 0666 | IPC_CREAT);
     cv::Mat* in_image = new cv::Mat(message_ctl_host_remote.data_rows, message_ctl_host_remote.data_cols, message_ctl_host_remote.data_type);
-    uint8_t* data_message = (uint8_t*) malloc(message_ctl_host_remote.data_message_size);
-    msgrcv(msgid_data_host_remote, (void*) data_message, message_ctl_host_remote.data_message_size, 1, 0);
-    memcpy(&(in_image->data), &(data_message[sizeof(long)]), message_ctl_host_remote.data_message_size-sizeof(long));
+    memcpy(&(in_image->data), image_buffer, message_ctl_host_remote.data_message_size);
     printf("Message Received\n");
 
 
     // to destroy the message queue
     msgctl(msgid_ctl_host_remote, IPC_RMID, NULL);
-    msgctl(msgid_data_host_remote, IPC_RMID, NULL);
-    return 0;
+    shmdt(image_buffer);
+    shmctl(shmid_data_host_remote,IPC_RMID,NULL);
+   return 0;
 }
