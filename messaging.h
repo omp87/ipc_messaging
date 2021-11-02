@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
+
 
 #include <opencv2/opencv.hpp>
 
@@ -15,6 +18,6 @@ typedef struct mesg_buffer {
     unsigned int data_rows;
     unsigned int data_cols;
     unsigned int data_type;
-    unsigned int data_message_size;
-    unsigned int message_flags;
+    unsigned int data_image_size;
+    unsigned int data_json_size;
 } message;
