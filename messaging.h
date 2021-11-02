@@ -6,7 +6,6 @@
 #include <sys/msg.h>
 #include <sys/shm.h>
 
-
 #include <opencv2/opencv.hpp>
 
 #define SHARED_IMAGE_BUFFER_SIZE 134217728

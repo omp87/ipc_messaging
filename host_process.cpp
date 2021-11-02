@@ -7,13 +7,11 @@ int main(int argc, char* argv[])
     key_ctl_host_remote = ftok(".", 60);
     int msgid_ctl_host_remote = msgget(key_ctl_host_remote, 0666 | IPC_CREAT);
     message message_ctl_host_remote;
-    printf("message size %ld\n", sizeof(message));
 
     key_t key_data_host_remote;
     key_data_host_remote = ftok(".", 61);
     int shmid_data_host_remote = shmget(key_data_host_remote,SHARED_IMAGE_BUFFER_SIZE,0666|IPC_CREAT);
     uint8_t *image_buffer = (uint8_t*) shmat(shmid_data_host_remote,(void*)0,0);
-    printf("shared memory %d\n", shmid_data_host_remote);
 
     key_t key_ctl_remote_host;
     key_ctl_remote_host = ftok(".", 62);
@@ -46,7 +44,15 @@ int main(int argc, char* argv[])
     if(msg_recv_result < 0)
     {}
 
+    //Grab data back from shared memory
+    cv::Mat* out_image = new cv::Mat(message_ctl_remote_host.data_rows, message_ctl_remote_host.data_cols, message_ctl_remote_host.data_type);
+    memcpy(&(out_image->data[0]), &(image_buffer[0]), message_ctl_remote_host.data_image_size);
+
+    //Free allocated memory
+    delete out_image;
     delete json_string;
+
+    //Free shared IPC components
     shmdt(image_buffer);
     msgctl(msgid_ctl_remote_host, IPC_RMID, NULL);
 
