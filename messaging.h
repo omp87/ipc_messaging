@@ -21,3 +21,4 @@ typedef struct mesg_buffer {
     unsigned int data_image_size;
     unsigned int data_json_size;
 } message;
+

@@ -7,6 +7,7 @@ int main(int argc, char* argv[])
     key_ctl_host_remote = ftok(".", 60);
     int msgid_ctl_host_remote = msgget(key_ctl_host_remote, 0666 | IPC_CREAT);
     message message_ctl_host_remote;
+    printf("message size %ld\n", sizeof(message));
 
     key_t key_data_host_remote;
     key_data_host_remote = ftok(".", 61);
@@ -29,23 +30,25 @@ int main(int argc, char* argv[])
     message_ctl_host_remote.data_image_size = in_image_size;
 
     //Copy image data into shared memory
-    memcpy(&(image_buffer[0]), (uint8_t*) &(in_image.data[0]), in_image_size);
+    memcpy((uint8_t*) &(image_buffer[0]), (uint8_t*) &(in_image.data[0]), in_image_size);
 
-    std::string json_string("{\"a\" : 5}");
-    message_ctl_host_remote.data_json_size = json_string.size();
+    std::string* json_string = new std::string("{\"a\" : 5}");
+    message_ctl_host_remote.data_json_size = json_string->size();
+    message_ctl_host_remote.data_json_size = 0; //debug
+    
     //image size corresponds with first byte after the image
-    memcpy(&(image_buffer[in_image_size]), json_string.c_str(), json_string.size());
-
+    memcpy(&(image_buffer[in_image_size]), json_string->c_str(), json_string->size());
     int msg_send_result = msgsnd(msgid_ctl_host_remote, &message_ctl_host_remote, sizeof(message), 0);
+    if(msg_send_result < 0)
+    {}
 
-    // display the message
-    printf("Data send is : %d \n", message_ctl_host_remote.data_image_size);
+    int msg_recv_result = msgrcv(msgid_ctl_remote_host, &message_ctl_remote_host, sizeof(message), 1, 0);
+    if(msg_recv_result < 0)
+    {}
 
-    msgrcv(msgid_ctl_remote_host, &message_ctl_remote_host, sizeof(message), 1, 0);
-    printf("Data Received is : %d \n", message_ctl_remote_host.data_image_size);
-    printf("testing last line\n");
-
+    delete json_string;
     shmdt(image_buffer);
+    msgctl(msgid_ctl_remote_host, IPC_RMID, NULL);
 
     return 0;
 }

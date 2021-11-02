@@ -20,10 +20,9 @@ int main()
     message message_ctl_remote_host;
 
     printf("size of message %ld\n", sizeof(message));
-    msgrcv(msgid_ctl_host_remote, &message_ctl_host_remote, sizeof(message), 1, 0);
+    msgrcv(msgid_ctl_host_remote, &message_ctl_host_remote,sizeof(message) , 1, 0);
     printf("Data Received is : %d \n", message_ctl_host_remote.data_image_size);
 
-    uint8_t* tmp_malloc = (uint8_t*)malloc(message_ctl_host_remote.data_image_size);
     cv::Mat* in_image = new cv::Mat(message_ctl_host_remote.data_rows, message_ctl_host_remote.data_cols, message_ctl_host_remote.data_type);
     memcpy((uint8_t*) &(in_image->data[0]), image_buffer, message_ctl_host_remote.data_image_size);
 
