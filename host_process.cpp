@@ -12,6 +12,8 @@ int main(int argc, char* argv[])
     key_data_host_remote = ftok(".", 61);
     int shmid_data_host_remote = shmget(key_data_host_remote,SHARED_IMAGE_BUFFER_SIZE,0666|IPC_CREAT);
     uint8_t *image_buffer = (uint8_t*) shmat(shmid_data_host_remote,(void*)0,0);
+    printf("shared memory %d\n", shmid_data_host_remote);
+
  
     key_t key_ctl_remote_host;
     key_ctl_remote_host = ftok(".", 62);
@@ -31,7 +33,6 @@ int main(int argc, char* argv[])
 
     memcpy(image_buffer, (uint8_t*) in_image.data, in_image_size);
     printf("Write Image Data");
-
 
     printf("size of message %ld\n", sizeof(message));
     msgid_ctl_host_remote = msgget(key_ctl_host_remote, 0666 | IPC_CREAT);
