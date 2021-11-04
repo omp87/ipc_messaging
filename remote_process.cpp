@@ -4,17 +4,17 @@ int main()
 {
     //create IPC structures for communicating between processes
     key_t key_ctl_host_remote;
-    key_ctl_host_remote = ftok(".", 60);
+    key_ctl_host_remote = ftok("keyfile", 60);
     int msgid_ctl_host_remote = msgget(key_ctl_host_remote, 0666 | IPC_CREAT);
     message message_ctl_host_remote;
 
     key_t key_data_host_remote;
-    key_data_host_remote = ftok(".", 61);
+    key_data_host_remote = ftok("keyfile", 61);
     int shmid_data_host_remote = shmget(key_data_host_remote,SHARED_IMAGE_BUFFER_SIZE,0666|IPC_CREAT);
     uint8_t *image_buffer = (uint8_t*) shmat(shmid_data_host_remote,(void*)0,0);
 
     key_t key_ctl_remote_host;
-    key_ctl_remote_host = ftok(".", 62);
+    key_ctl_remote_host = ftok("keyfile", 62);
     int msgid_ctl_remote_host = msgget(key_ctl_remote_host, 0666 | IPC_CREAT);;
     message message_ctl_remote_host;
 
@@ -25,8 +25,8 @@ int main()
 
     char* json_string_char = new char[message_ctl_host_remote.data_json_size];
     memcpy(&(json_string_char[0]), &(image_buffer[message_ctl_host_remote.data_image_size]), message_ctl_host_remote.data_json_size);
-    std::string json_string(json_string_char);
-    std::cout << json_string << std::endl;
+    std::string* json_string = new std::string(json_string_char);
+    std::cout << *json_string << std::endl;
 
     //Manipulate Image
     cv::inRange(*in_image, cv::Scalar(0,0,0), cv::Scalar(255,255,255), *in_image);
@@ -51,6 +51,7 @@ int main()
     //Free allocated memory
     delete in_image;
     delete json_string_char;
+    delete json_string;
 
     //Free shared IPC components
     msgctl(msgid_ctl_host_remote, IPC_RMID, NULL);
